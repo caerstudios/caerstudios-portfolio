@@ -290,15 +290,20 @@
         return;
       }
 
-      // Success: hide the form, show the confirmation message.
-      var success = document.getElementById("formSuccess");
-      form.style.display = "none";
-      if (success) {
-        success.classList.add("show");
-        success.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-      form.reset();
-    });
+      // Success: submit to Formspree
+var data = new FormData(form);
+fetch(form.action, {
+  method: 'POST',
+  body: data,
+  headers: { 'Accept': 'application/json' }
+}).then(function(response) {
+  if (response.ok) {
+    var success = document.getElementById("formSuccess");
+    form.style.display = "none";
+    if (success) { success.classList.add("show"); success.scrollIntoView({ behavior: "smooth", block: "center" }); }
+    form.reset();
+  }
+});
 
     // Clear an error as soon as the user starts fixing it.
     form.querySelectorAll("input, select, textarea").forEach(function (input) {
