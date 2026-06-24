@@ -258,7 +258,7 @@
   }
 
   /* =================================================================
-     7. CONTACT FORM — validation + success message (no reload)
+     7. CONTACT FORM — validation + Formspree submission
      ================================================================= */
   var form = document.getElementById("bookingForm");
   if (form) {
@@ -284,26 +284,37 @@
       });
 
       if (!valid) {
-        // Focus the first field with an error for accessibility.
         var firstErr = form.querySelector(".field.error input, .field.error select, .field.error textarea");
         if (firstErr) firstErr.focus();
         return;
       }
 
-      // Success: submit to Formspree
-var data = new FormData(form);
-fetch(form.action, {
-  method: 'POST',
-  body: data,
-  headers: { 'Accept': 'application/json' }
-}).then(function(response) {
-  if (response.ok) {
-    var success = document.getElementById("formSuccess");
-    form.style.display = "none";
-    if (success) { success.classList.add("show"); success.scrollIntoView({ behavior: "smooth", block: "center" }); }
-    form.reset();
-  }
-});
+      // Validation passed — submit to Formspree.
+      var submitBtn = form.querySelector("[type=submit]");
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Sending…"; }
+
+      fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { "Accept": "application/json" }
+      }).then(function (response) {
+        if (response.ok) {
+          var success = document.getElementById("formSuccess");
+          form.style.display = "none";
+          if (success) {
+            success.classList.add("show");
+            success.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+          form.reset();
+        } else {
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Send Booking Request"; }
+          alert("Something went wrong — please try again or call us on 029 2000 0000.");
+        }
+      }).catch(function () {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Send Booking Request"; }
+        alert("Could not send your request — please check your connection or call us on 029 2000 0000.");
+      });
+    });
 
     // Clear an error as soon as the user starts fixing it.
     form.querySelectorAll("input, select, textarea").forEach(function (input) {
